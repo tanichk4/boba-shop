@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Моя Боба Крамничка 🧋</title>
+<style>
+  :root{
+    --bg:#FFF4E8; --panel:#FFFFFF; --ink:#5C4636; --soft:#A98F7B;
+    --pink:#FFB7C9; --pink-d:#F08CA6; --mint:#BFE6CF; --butter:#FFE3A9;
+    --brown:#6B4A33; --shadow:0 6px 0 rgba(107,74,51,.12);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  body{
+    margin:0; min-height:100vh; background:var(--bg);
+    background-image:radial-gradient(#ffd9e4 8%, transparent 9%), radial-gradient(#ffe9c9 8%, transparent 9%);
+    background-size:46px 46px; background-position:0 0,23px 23px;
+    font-family:ui-rounded,"SF Pro Rounded","Nunito","Segoe UI",system-ui,sans-serif;
+    color:var(--ink); display:flex; align-items:center; justify-content:center; padding:14px;
+  }
+  .game{width:100%; max-width:780px;}
+  header{display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;}
+  h1{font-size:1.35rem; margin:0; letter-spacing:.3px;}
+  .stats{display:flex; gap:8px;}
+  .chip{background:var(--panel); border-radius:999px; padding:6px 14px; font-weight:800; box-shadow:var(--shadow); font-size:.95rem;}
+  .board{display:grid; grid-template-columns:1fr 230px; gap:14px;}
+  @media(max-width:640px){.board{grid-template-columns:1fr;}}
+  .panel{background:var(--panel); border-radius:22px; padding:16px; box-shadow:var(--shadow);}
+
+  /* customer */
+  .customer{display:flex; gap:12px; align-items:flex-start; min-height:96px;}
+  .face{font-size:3rem; line-height:1; animation:bob 2.4s ease-in-out infinite;}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+  .bubble{background:var(--butter); border-radius:16px 16px 16px 4px; padding:10px 14px; flex:1; font-size:.95rem; position:relative;}
+  .bubble b{display:block; margin-bottom:4px;}
+  .hearts{font-size:1rem; letter-spacing:2px; margin-top:6px;}
+
+  /* cup */
+  .cupzone{display:flex; flex-direction:column; align-items:center; gap:10px;}
+  .cup{width:130px; height:185px; position:relative;}
+  .cup .glass{
+    position:absolute; inset:0; border:5px solid var(--brown); border-top-width:6px;
+    border-radius:14px 14px 38px 38px; background:rgba(255,255,255,.55); overflow:hidden;
+    clip-path:polygon(6% 0,94% 0,86% 100%,14% 100%);
+  }
+  .liquid{position:absolute; left:0; right:0; bottom:0; height:0; transition:height .45s cubic-bezier(.34,1.4,.64,1), background .3s;}
+  .pearls{position:absolute; left:0; right:0; bottom:4px; height:34px; display:flex; flex-wrap:wrap; gap:3px; justify-content:center; align-content:flex-end; padding:0 12px;}
+  .pearl{width:13px; height:13px; border-radius:50%; animation:drop .5s cubic-bezier(.3,1.6,.5,1);}
+  .pearl.jelly{border-radius:3px;}
+  @keyframes drop{from{transform:translateY(-120px)}to{transform:translateY(0)}}
+  .straw{position:absolute; top:-26px; left:58%; width:13px; height:80px; background:var(--pink-d); border-radius:6px; transform:rotate(8deg); display:none;}
+  .cup.served .straw{display:block;}
+  .cup.shake{animation:shake .5s;}
+  @keyframes shake{0%,100%{transform:rotate(0)}25%{transform:rotate(-7deg)}75%{transform:rotate(7deg)}}
+
+  /* controls */
+  .group{margin-bottom:10px;}
+  .group h3{margin:0 0 6px; font-size:.8rem; text-transform:uppercase; letter-spacing:1px; color:var(--soft);}
+  .opts{display:flex; flex-wrap:wrap; gap:6px;}
+  button{
+    font-family:inherit; font-weight:800; color:var(--ink); border:0; cursor:pointer;
+    background:#F6EDE3; border-radius:999px; padding:8px 13px; font-size:.9rem;
+    box-shadow:0 3px 0 rgba(107,74,51,.15); transition:transform .08s;
+  }
+  button:active{transform:translateY(2px); box-shadow:none;}
+  button.sel{background:var(--pink); color:#7A2E45; outline:3px solid var(--pink-d);}
+  .serve{width:100%; background:var(--mint); font-size:1.05rem; padding:13px; margin-top:4px;}
+  .serve:disabled{opacity:.45; cursor:not-allowed;}
+  .toast{
+    position:fixed; left:50%; top:18%; transform:translateX(-50%); background:var(--brown); color:#fff;
+    padding:12px 22px; border-radius:16px; font-weight:800; font-size:1.05rem; opacity:0;
+    pointer-events:none; transition:opacity .25s, transform .25s; z-index:5; text-align:center;
+  }
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(-8px);}
+
+  /* overlay */
+  .overlay{position:fixed; inset:0; background:rgba(92,70,54,.45); display:flex; align-items:center; justify-content:center; z-index:10; padding:16px;}
+  .card{background:var(--panel); border-radius:26px; padding:28px; max-width:380px; text-align:center; box-shadow:var(--shadow);}
+  .card h2{margin:0 0 8px;}
+  .card .big{font-size:3rem; margin:8px 0;}
+  .hidden{display:none !important;}
+  @media (prefers-reduced-motion: reduce){ *{animation:none !important; transition:none !important;} }
+</style>
+</head>
+<body>
+<div class="game">
+  <header>
+    <h1>🧋 Моя Боба Крамничка</h1>
+    <div class="stats">
+      <div class="chip">💰 <span id="money">0</span>₴</div>
+      <div class="chip">👥 <span id="cust">1</span>/8</div>
+    </div>
+  </header>
+
+  <div class="board">
+    <div class="panel">
+      <div class="customer">
+        <div class="face" id="face">🐱</div>
+        <div class="bubble">
+          <b id="oname">Замовлення</b>
+          <span id="otext"></span>
+          <div class="hearts" id="hearts">💗💗💗💗💗</div>
+        </div>
+      </div>
+
+      <div class="group">
+        <h3>1 · Чай</h3>
+        <div class="opts" id="teaOpts"></div>
+      </div>
+      <div class="group">
+        <h3>2 · Молоко</h3>
+        <div class="opts" id="milkOpts"></div>
+      </div>
+      <div class="group">
+        <h3>3 · Топінг</h3>
+        <div class="opts" id="topOpts"></div>
+      </div>
+      <button class="serve" id="serveBtn" disabled>🥤 Збовтати й подати!</button>
+    </div>
+
+    <div class="panel cupzone">
+      <div class="cup" id="cup">
+        <div class="straw"></div>
+        <div class="glass">
+          <div class="liquid" id="liquid"></div>
+          <div class="pearls" id="pearls"></div>
+        </div>
+      </div>
+      <div style="font-size:.85rem; color:var(--soft); text-align:center;">Склянка дня</div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="overlay" id="startOv">
+  <div class="card">
+    <div class="big">🧋</div>
+    <h2>Моя Боба Крамничка</h2>
+    <p>До тебе завітає 8 пухнастих клієнтів. Збери напій точно за замовленням, поки не розтанули сердечка терпіння — то й чайові будуть щедріші!</p>
+    <button class="serve" id="startBtn">Відчинити крамничку ☀️</button>
+  </div>
+</div>
+
+<div class="overlay hidden" id="endOv">
+  <div class="card">
+    <div class="big" id="endEmoji">🏆</div>
+    <h2 id="endTitle">День завершено!</h2>
+    <p id="endText"></p>
+    <button class="serve" id="againBtn">Новий день 🌸</button>
+  </div>
+</div>
+
+<script>
+const TEAS = [
+  {id:'black',  name:'Чорний',   color:'#8B5A3C', milky:'#C9A188'},
+  {id:'green',  name:'Зелений',  color:'#9DBF7A', milky:'#CFE0B8'},
+  {id:'matcha', name:'Матча',    color:'#7FA84C', milky:'#B7D391'},
+  {id:'thai',   name:'Тайський', color:'#E8804C', milky:'#F4B998'},
+];
+const MILKS = [
+  {id:'yes', name:'З молоком 🥛'},
+  {id:'no',  name:'Без молока'},
+];
+const TOPS = [
+  {id:'tapioca', name:'Тапіока ⚫', color:'#3B2A20', jelly:false},
+  {id:'jelly',   name:'Желе 🍓',   color:'#E85D75', jelly:true},
+  {id:'popping', name:'Попінг 🥭', color:'#FFC53D', jelly:false},
+];
+const FACES = ['🐱','🐶','🐰','🐼','🦊','🐹','🐻','🐸','🐨','🦝'];
+const NAMES = ['Мімі','Бублик','Зефірка','Латте','Кіко','Моті','Пончик','Юкі','Боба','Мандаринка'];
+
+let money=0, custNo=0, order=null, pick={tea:null,milk:null,top:null};
+let hearts=5, heartTimer=null;
+
+const $ = id => document.getElementById(id);
+
+function mkOpts(elId, list, key){
+  const el = $(elId); el.innerHTML='';
+  list.forEach(item=>{
+    const b=document.createElement('button');
+    b.textContent=item.name;
+    b.onclick=()=>{
+      pick[key]=item.id;
+      [...el.children].forEach(c=>c.classList.remove('sel'));
+      b.classList.add('sel');
+      renderCup(); checkReady();
+    };
+    el.appendChild(b);
+  });
+}
+
+function renderCup(){
+  const liq=$('liquid'), pearls=$('pearls');
+  if(pick.tea){
+    const t=TEAS.find(x=>x.id===pick.tea);
+    liq.style.height='78%';
+    liq.style.background = (pick.milk==='yes') ? t.milky : t.color;
+  } else { liq.style.height='0'; }
+  pearls.innerHTML='';
+  if(pick.top){
+    const tp=TOPS.find(x=>x.id===pick.top);
+    for(let i=0;i<10;i++){
+      const p=document.createElement('div');
+      p.className='pearl'+(tp.jelly?' jelly':'');
+      p.style.background=tp.color;
+      p.style.animationDelay=(i*0.03)+'s';
+      pearls.appendChild(p);
+    }
+  }
+}
+
+function checkReady(){
+  $('serveBtn').disabled = !(pick.tea && pick.milk && pick.top);
+}
+
+function rnd(a){ return a[Math.floor(Math.random()*a.length)]; }
+
+function orderText(o){
+  const t=TEAS.find(x=>x.id===o.tea).name.toLowerCase();
+  const m=o.milk==='yes'?'з молоком':'без молока';
+  const tp=TOPS.find(x=>x.id===o.top).name.toLowerCase();
+  return `Мені, будь ласка, ${t} чай ${m} і топінг ${tp}!`;
+}
+
+function newCustomer(){
+  custNo++;
+  if(custNo>8){ endDay(); return; }
+  $('cust').textContent=custNo;
+  order={tea:rnd(TEAS).id, milk:rnd(MILKS).id, top:rnd(TOPS).id};
+  pick={tea:null,milk:null,top:null};
+  document.querySelectorAll('button.sel').forEach(b=>b.classList.remove('sel'));
+  $('face').textContent=rnd(FACES);
+  $('oname').textContent=rnd(NAMES)+':';
+  $('otext').textContent=orderText(order);
+  $('cup').classList.remove('served');
+  renderCup(); checkReady();
+  hearts=5; drawHearts();
+  clearInterval(heartTimer);
+  heartTimer=setInterval(()=>{
+    if(hearts>1){ hearts--; drawHearts(); }
+  }, 9000);
+}
+
+function drawHearts(){
+  $('hearts').textContent='💗'.repeat(hearts)+'🤍'.repeat(5-hearts);
+}
+
+function toast(msg){
+  const t=$('toast'); t.innerHTML=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 1700);
+}
+
+$('serveBtn').onclick=()=>{
+  clearInterval(heartTimer);
+  const cup=$('cup');
+  cup.classList.add('shake');
+  $('serveBtn').disabled=true;
+  setTimeout(()=>{
+    cup.classList.remove('shake');
+    cup.classList.add('served');
+    let correct=0;
+    if(pick.tea===order.tea) correct++;
+    if(pick.milk===order.milk) correct++;
+    if(pick.top===order.top) correct++;
+    let pay=0, msg='';
+    if(correct===3){
+      pay=60+hearts*10;
+      msg=`✨ Ідеально! +${pay}₴ (чайові ×${hearts}💗)`;
+    } else if(correct===2){
+      pay=30;
+      msg=`🙂 Майже! Щось переплутала… +${pay}₴`;
+    } else {
+      pay=5;
+      msg=`😿 Ой, це зовсім не те… +${pay}₴ «за старання»`;
+    }
+    money+=pay; $('money').textContent=money;
+    toast(msg);
+    setTimeout(newCustomer, 1900);
+  }, 520);
+};
+
+function endDay(){
+  clearInterval(heartTimer);
+  let emoji,title,text;
+  if(money>=480){ emoji='🏆'; title='Легенда бобси!'; text=`Ти заробила ${money}₴ — черга під крамничкою аж за ріг! Моіша пишався би.`; }
+  else if(money>=300){ emoji='🌸'; title='Чудовий день!'; text=`${money}₴ у касі. Клієнти йдуть додому щасливі та з перлинками в зубах.`; }
+  else { emoji='🫧'; title='Бувають дні й кращі…'; text=`${money}₴. Нічого, тапіока навчить терпіння. Спробуєш ще раз?`; }
+  $('endEmoji').textContent=emoji;
+  $('endTitle').textContent=title;
+  $('endText').textContent=text;
+  $('endOv').classList.remove('hidden');
+}
+
+$('startBtn').onclick=()=>{
+  $('startOv').classList.add('hidden');
+  custNo=0; money=0; $('money').textContent=0;
+  newCustomer();
+};
+$('againBtn').onclick=()=>{
+  $('endOv').classList.add('hidden');
+  custNo=0; money=0; $('money').textContent=0;
+  newCustomer();
+};
+
+mkOpts('teaOpts', TEAS, 'tea');
+mkOpts('milkOpts', MILKS, 'milk');
+mkOpts('topOpts', TOPS, 'top');
+</script>
+</body>
+</html>
